@@ -104,7 +104,7 @@ public class MainActivity extends android.app.NativeActivity
             folder.mkdirs();
             Log.d("MainActivity", "created emulator directory");
         } else {
-            Log.d("MainActivity", "folder alread exists: " + storageDir);
+            Log.d("MainActivity", "folder already exists: " + storageDir);
         }
     }
 
