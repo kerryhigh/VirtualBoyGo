@@ -201,6 +201,20 @@ void Emulator::Free() {
     glBindTexture(GL_TEXTURE_2D, 0);
     glDeleteTextures(1, &screenTextureId);
     glDeleteTextures(1, &stateImageId);
+
+    if (currentGame != nullptr) {
+        for (int i = 0; i < 10; ++i) {
+            delete[] currentGame->saveStates[i].saveImage;
+            currentGame->saveStates[i].saveImage = nullptr;
+        }
+        delete currentGame;
+        currentGame = nullptr;
+    }
+
+    delete[] pixelData;
+    pixelData = nullptr;
+    delete[] stateImageData;
+    stateImageData = nullptr;
 }
 
 void Emulator::Init(std::string appFolderPath, LayerBuilder *_layerBuilder, DrawHelper *_drawHelper, OpenSLWrapper *openSLWrap) {
@@ -659,7 +673,7 @@ void Emulator::SaveState(int slot) {
 
     if (size > 0) {
         std::string savePath = stateFolderPath + CurrentRom->RomName + ".state";
-        if (ovrVirtualBoyGo::global.saveSlot > 0) savePath += ToString(ovrVirtualBoyGo::global.saveSlot);
+        if (slot > 0) savePath += ToString(slot);
 
         OVR_LOG("save slot");
         void *data = new uint8_t[size];
@@ -673,14 +687,14 @@ void Emulator::SaveState(int slot) {
     }
 
     OVR_LOG("copy image");
-    memcpy(currentGame->saveStates[ovrVirtualBoyGo::global.saveSlot].saveImage, screenData,
+    memcpy(currentGame->saveStates[slot].saveImage, screenData,
            sizeof(uint8_t) * VIDEO_WIDTH * VIDEO_HEIGHT);
     OVR_LOG("update image");
-    UpdateStateImage(ovrVirtualBoyGo::global.saveSlot);
+    UpdateStateImage(slot);
     // save image for the slot
-    SaveStateImage(ovrVirtualBoyGo::global.saveSlot);
-    currentGame->saveStates[ovrVirtualBoyGo::global.saveSlot].hasImage = true;
-    currentGame->saveStates[ovrVirtualBoyGo::global.saveSlot].hasState = true;
+    SaveStateImage(slot);
+    currentGame->saveStates[slot].hasImage = true;
+    currentGame->saveStates[slot].hasState = true;
 }
 
 void Emulator::LoadState(int slot) {
