@@ -111,9 +111,12 @@ void Emulator::InitSettingsMenu(int &posX, int &posY, Menu &settingsMenu) {
     button_icons[12] = &ovrVirtualBoyGo::global.mappingRightLeftId;
     button_icons[13] = &ovrVirtualBoyGo::global.mappingRightDownId;
 
-    //MenuButton *curveButton =
-    //    new MenuButton(&fontMenu, texturePaletteIconId, "", posX, posY += menuItemSize,
-    //                   OnClickCurveScreen, nullptr, nullptr);
+    screenShapeButton = std::make_shared<MenuButton>(&ovrVirtualBoyGo::global.fontMenu,
+                                                    ovrVirtualBoyGo::global.texturePaletteIconId,
+                                                    "", posX, posY += menuItemSize,
+                                                    std::bind(&Emulator::OnClickCurveScreen, this, _1),
+                                                    std::bind(&Emulator::OnClickCurveScreen, this, _1),
+                                                    std::bind(&Emulator::OnClickCurveScreen, this, _1));
 
     int menuItemSize = ovrVirtualBoyGo::global.menuItemSize;
     screenModeButton = std::make_unique<MenuButton>(&ovrVirtualBoyGo::global.fontMenu, ovrVirtualBoyGo::global.threedeeIconId, "", posX, posY += menuItemSize,
@@ -139,7 +142,7 @@ void Emulator::InitSettingsMenu(int &posX, int &posY, Menu &settingsMenu) {
     bButton = std::make_unique<MenuButton>(&ovrVirtualBoyGo::global.fontMenu, ovrVirtualBoyGo::global.texturePaletteIconId, "", posX, posY += menuItemSize,
                                            nullptr, std::bind(&Emulator::OnClickBLeft, this, _1), std::bind(&Emulator::OnClickBRight, this, _1));
 
-    //settingsMenu.MenuItems.push_back(curveButton);
+    settingsMenu.MenuItems.push_back(screenShapeButton);
     settingsMenu.MenuItems.push_back(screenModeButton);
     settingsMenu.MenuItems.push_back(offsetButton);
     settingsMenu.MenuItems.push_back(paletteButton);
@@ -148,6 +151,7 @@ void Emulator::InitSettingsMenu(int &posX, int &posY, Menu &settingsMenu) {
     settingsMenu.MenuItems.push_back(bButton);
 
     ChangeOffset(offsetButton.get(), 0);
+    SetCurvedMove(screenShapeButton.get(), useCubeMap);
     SetThreeDeeMode(screenModeButton.get(), useThreeDeeMode);
     ChangePalette(paletteButton.get(), 0);
 }
@@ -545,6 +549,7 @@ void Emulator::SaveEmulatorSettings(std::ofstream *saveFile) {
     saveFile->write(reinterpret_cast<const char *>(&selectedPredefColor), sizeof(int));
     saveFile->write(reinterpret_cast<const char *>(&threedeeIPD), sizeof(float));
     saveFile->write(reinterpret_cast<const char *>(&useThreeDeeMode), sizeof(bool));
+    saveFile->write(reinterpret_cast<const char *>(&useCubeMap), sizeof(bool));
 
     // save button mapping
     for (int i = 0; i < buttonCount; ++i) {
@@ -566,6 +571,7 @@ void Emulator::LoadEmulatorSettings(std::ifstream *readFile) {
     readFile->read((char *) &selectedPredefColor, sizeof(int));
     readFile->read((char *) &threedeeIPD, sizeof(float));
     readFile->read((char *) &useThreeDeeMode, sizeof(bool));
+    readFile->read((char *) &useCubeMap, sizeof(bool));
 
     // load button mapping
     for (int i = 0; i < buttonCount; ++i) {

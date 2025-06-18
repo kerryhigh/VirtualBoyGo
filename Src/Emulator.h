@@ -190,6 +190,7 @@ private:
 
     std::shared_ptr<MenuList<Rom>> romList;
     std::shared_ptr<MenuButton> screenModeButton, offsetButton, paletteButton;
+    std::shared_ptr<MenuButton> screenShapeButton;
     std::shared_ptr<MenuButton> rButton, gButton, bButton;
 
     void OnClickRLeft(MenuItem *item);
